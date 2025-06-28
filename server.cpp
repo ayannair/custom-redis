@@ -37,7 +37,7 @@ int main() {
     int val = 1;
     setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)); // set socket options ALWAYS DO THIS
 
-    // bind to address 1234
+    // bind to address 0 on port 1234
     struct sockaddr_in addr = {};
     addr.sin_family = AF_INET;
     addr.sin_port = htons(1234);        // port
