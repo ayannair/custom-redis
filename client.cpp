@@ -25,7 +25,7 @@ static int32_t read_full(int fd, char *buf, size_t n) {
     while (n > 0) {
         ssize_t rv = read(fd, buf, n);
         if (rv <= 0) {
-            return -1;  // error, or unexpected EOF
+            return -1;
         }
         assert((size_t)rv <= n);
         n -= (size_t)rv;
@@ -38,7 +38,7 @@ static int32_t write_all(int fd, const char *buf, size_t n) {
     while (n > 0) {
         ssize_t rv = write(fd, buf, n);
         if (rv <= 0) {
-            return -1;  // error
+            return -1;
         }
         assert((size_t)rv <= n);
         n -= (size_t)rv;
@@ -59,7 +59,7 @@ static int32_t send_req(int fd, const std::vector<std::string> &cmd) {
     }
 
     char wbuf[4 + k_max_msg];
-    memcpy(&wbuf[0], &len, 4);  // assume little endian
+    memcpy(&wbuf[0], &len, 4);
     uint32_t n = cmd.size();
     memcpy(&wbuf[4], &n, 4);
     size_t cur = 8;
@@ -73,7 +73,6 @@ static int32_t send_req(int fd, const std::vector<std::string> &cmd) {
 }
 
 static int32_t read_res(int fd) {
-    // 4 bytes header
     char rbuf[4 + k_max_msg + 1];
     errno = 0;
     int32_t err = read_full(fd, rbuf, 4);
@@ -87,20 +86,18 @@ static int32_t read_res(int fd) {
     }
 
     uint32_t len = 0;
-    memcpy(&len, rbuf, 4);  // assume little endian
+    memcpy(&len, rbuf, 4);
     if (len > k_max_msg) {
         msg("too long");
         return -1;
     }
 
-    // reply body
     err = read_full(fd, &rbuf[4], len);
     if (err) {
         msg("read() error");
         return err;
     }
 
-    // print the result
     uint32_t rescode = 0;
     if (len < 4) {
         msg("bad response");
@@ -120,7 +117,7 @@ int main(int argc, char **argv) {
     struct sockaddr_in addr = {};
     addr.sin_family = AF_INET;
     addr.sin_port = ntohs(1234);
-    addr.sin_addr.s_addr = ntohl(INADDR_LOOPBACK);  // 127.0.0.1
+    addr.sin_addr.s_addr = ntohl(INADDR_LOOPBACK);
     int rv = connect(fd, (const struct sockaddr *)&addr, sizeof(addr));
     if (rv) {
         die("connect");
